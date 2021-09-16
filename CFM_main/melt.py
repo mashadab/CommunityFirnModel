@@ -161,6 +161,8 @@ def bucket(self,iii):
         else:
             imp = np.where(self.rho>=RhoImp)[0] #all nodes exceeding RhoImp are considered impermeable
     imp = imp.astype(int)
+    if len(imp) == 0:
+        imp = [(len(self.rho)-1)] #MS: (hack solution?) If domain does not extend to full ice density, this will ensure the melt routine works
     stcap[imp] = 0. #set 0 storage capacity for impermeable nodes
     stcap_cum  = np.cumsum(stcap) #cumulative storage capacity
 
@@ -172,7 +174,7 @@ def bucket(self,iii):
             ii0 = np.where(stcap_cum>=liqinpvol)[0][0] #bottom most node storing surface melt
         else: #not enough storage capacity for liq input
             ii0 = nnd-1 #set ii0 to bottom node
-        if ((imp.size) and (ii0>=imp[0])): #impermeable barrier prevents full distri of meltinput
+        if ii0>=imp[0]: #impermeable barrier prevents full distri of meltinput
             ii0 = max(0,imp[0]-1) #ii0 limited to node above impermeable barrier
             storageinp = np.concatenate((stcap[0:ii0+1],np.zeros(nnd-ii0-1))) #storage of what can be stored
             LWCblocked[ii0] = liqinpvol-sum(storageinp) #rest of input water is blocked
@@ -201,7 +203,7 @@ def bucket(self,iii):
         jj0 = indsexc[0] #start from most upper node with excess LWC
         if np.any(stcap1>0): #there is some storage capacity in the firn column
             indb2 = np.where(stcap1>0)[0][-1] #bottom most node where LWCexc can be stored
-            while ((jj0<=indb1) or (tostore>0)):
+            while ((jj0<=indb1) or (tostore>0)): #MS: why or? (should be and?)
                 jj1 = jj0+np.where(stcap1[jj0:]>0)[0][0] #next node that can store some of the LWCexc
                 if imp[np.where(imp>=jj0)[0][0]]>jj1: #jj0 and jj1 nodes not separated by an impermeable barrier
                     tostore += sum(LWCexc[jj0:jj1+1]) #all LWCexc from jj0 to jj1 are subject to storage
