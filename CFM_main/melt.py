@@ -204,12 +204,16 @@ def bucket(self,iii):
         jj0 = indsexc[0] #start from most upper node with excess LWC
 
         # if np.any(stcap1>0): #there is some storage capacity in the firn column
-        if np.any(stcap1[1:]>0): #there is some storage capacity in the firn column (MS added 1: - avoid having upper node be the only one with capacity)
+        if ((np.any(stcap1[1:]>0)) and (np.any(stcap1[jj0:]>0))): #there is some storage capacity in the firn column (MS added 1: - avoid having upper node be the only one with capacity)
             indb2 = np.where(stcap1>0)[0][-1] #bottom most node where LWCexc can be stored
 
             while ((jj0<=indb1) or (tostore>0)): #MS: why or? (should be and?)
-                jj1 = jj0+np.where(stcap1[jj0:]>0)[0][0] #next node that can store some of the LWCexc
-
+                try:
+                    jj1 = jj0+np.where(stcap1[jj0:]>0)[0][0] #next node that can store some of the LWCexc
+                except:
+                    print(jj0)
+                    print(stcap1)
+                    sys.exit()
                 if imp[np.where(imp>=jj0)[0][0]]>jj1: #jj0 and jj1 nodes not separated by an impermeable barrier
                     tostore += sum(LWCexc[jj0:jj1+1]) #all LWCexc from jj0 to jj1 are subject to storage
                     LWC1[jj0:jj1+1] = np.minimum(LWC1[jj0:jj1+1],LWCirr[jj0:jj1+1]) #LWCexc is evacuated
