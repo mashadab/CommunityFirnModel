@@ -196,6 +196,7 @@ def makeSpinFiles(CLIM_name,timeres='1D',Tinterp='mean',spin_date_st = 1980.0, s
     df_spin.index.name = 'decdate'
 
     df_FULL = pd.concat([df_spin,df_CLIM_decdate])
+    print('df_full:',df_FULL.head())
 
     CD = {}
     CD['time'] = df_FULL.index

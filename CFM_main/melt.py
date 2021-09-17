@@ -196,15 +196,20 @@ def bucket(self,iii):
     ### Distribute LWCexc in the nodes supporting storage and/or in LWCblocked ###
     LWC1 = np.copy(self.LWC) #LWC will be modified by LWCexc transfers
     storage1 = np.zeros(nnd) #LWC stored in the different nodes
+
     if np.any(LWCexc)>0: #if there is some excess LWC
         tostore = 0 #LWC stock that must be stored
         indsexc = np.where(LWCexc>0)[0] #indices of nodes with excess LWC
         indb1 = indsexc[-1] #bottom most node where LWCexc should be considered
         jj0 = indsexc[0] #start from most upper node with excess LWC
-        if np.any(stcap1>0): #there is some storage capacity in the firn column
+
+        # if np.any(stcap1>0): #there is some storage capacity in the firn column
+        if np.any(stcap1[1:]>0): #there is some storage capacity in the firn column (MS added 1: - avoid having upper node be the only one with capacity)
             indb2 = np.where(stcap1>0)[0][-1] #bottom most node where LWCexc can be stored
+
             while ((jj0<=indb1) or (tostore>0)): #MS: why or? (should be and?)
                 jj1 = jj0+np.where(stcap1[jj0:]>0)[0][0] #next node that can store some of the LWCexc
+
                 if imp[np.where(imp>=jj0)[0][0]]>jj1: #jj0 and jj1 nodes not separated by an impermeable barrier
                     tostore += sum(LWCexc[jj0:jj1+1]) #all LWCexc from jj0 to jj1 are subject to storage
                     LWC1[jj0:jj1+1] = np.minimum(LWC1[jj0:jj1+1],LWCirr[jj0:jj1+1]) #LWCexc is evacuated
@@ -215,6 +220,7 @@ def bucket(self,iii):
                         jj1 = imp[np.where(imp>=jj0)[0][0]]-1 #find the next impermeable barrier
                         LWCblocked[jj1] += tostore #all LWC to be stored is blocked above the barrier
                         tostore = 0. #tostore is set to 0
+
                 else: #impermeable barrier between jj0 and jj1
                     jj1 = imp[np.where(imp>=jj0)[0][0]]-1 #jj1 becomes index of node above the impermeable barrier
                     tostore += sum(LWCexc[jj0:jj1+1]) #all LWCexc from jj0 to jj1 are subject to be blocked above the barrier
@@ -225,6 +231,7 @@ def bucket(self,iii):
                         jj0 = indsexc[np.where(indsexc>jj1)[0][0]] #go to next node with LWCexc>0
                     else: #all nodes with LWCexc have been treated
                         jj0 = indb1+1 #terminate the while loop
+        
         else: #no storage capacity in the firn column
             for jj0 in indsexc: #find underlying impermeable barrier for each node with some LWCexc
                 jj1 = imp[np.where(imp>=jj0)[0][0]]-1 #jj1 becomes index of node above the impermeable barrier
