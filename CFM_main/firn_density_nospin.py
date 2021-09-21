@@ -521,6 +521,7 @@ class FirnDensityNoSpin:
             #VV update (23/03/2021)
             self.refreeze = np.array([0.]) #total liquid water refreezing at each time step [m we]
             self.runoff     = np.array([0.]) #total liquid water runoff at each time step [m we]
+            self.meltvol    = np.array([0.]) #total melt volume
 
         ### initial grain growth (if specified in config file)
         if self.c['physGrain']:
@@ -683,6 +684,7 @@ class FirnDensityNoSpin:
             # self.output_list.append('refrozen') # Should this be in each grid point, or total?
             self.output_list.append('refreeze') #VV (23/03/2021)
             self.output_list.append('runoff') #VV (23/03/2021)
+            self.output_list.append('meltvol')
         
         if ((not self.MELT) and ('LWC' in self.output_list)):
             self.output_list.remove('LWC')
@@ -871,9 +873,10 @@ class FirnDensityNoSpin:
                         self.rho, self.age, self.dz, self.Tz, self.r2, self.z, self.mass, self.dzn, self.LWC, meltgridtrack, self.refreeze, self.runoff = bucket(self,iii)
                         if self.doublegrid==True: # if we use doublegrid -> use the gridtrack corrected for melting
                             self.gridtrack = np.copy(meltgridtrack)
+                        self.meltvol = self.snowmelt[iii]*0.917 #[m w.e.]
                     else: # Dry firn column and no input of meltwater                        
                         self.dzn     = self.dz[0:self.compboxes] # Not sure this is necessary
-                        self.refreeze, self.runoff = 0.,0.
+                        self.refreeze, self.runoff, self.meltvol = 0.,0.,0.
                     ### Heat ###
                     if np.all(self.LWC==0.): #VV regular heat diffusion if no water in column (all refrozen or 0 water holding cap)
                         self.Tz, self.T10m  = heatDiff(self,iii)
@@ -892,8 +895,9 @@ class FirnDensityNoSpin:
                             self.rho, self.age, self.dz, self.Tz, self.r2, self.z, self.mass, self.dzn, self.LWC, meltgridtrack, self.refreeze, self.runoff = darcyscheme(self,iii)
                         if self.doublegrid==True: # if we use doublegrid -> use the gridtrack corrected for melting
                             self.gridtrack = np.copy(meltgridtrack)
+                        self.meltvol = self.snowmelt[iii]*0.917 #[m w.e.]
                     else: # Dry firn column and no input of meltwater                       
-                        self.refreeze, self.runoff = 0.,0.
+                        self.refreeze, self.runoff,self.meltvol = 0.,0.,0.
                         self.dzn     = self.dz[0:self.compboxes] # Not sure this is necessary
                     ### Heat ###
                     if np.all(self.LWC==0.): #VV regular heat diffusion if no water in column (all refrozen or 0 water holding cap)

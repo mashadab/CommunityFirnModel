@@ -163,13 +163,18 @@ def transient_solve_TR(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s,
         S_P     = 0.0
         a_P     = a_U + a_D + a_P_0 - S_P*dZ
 
+        #######################################
+        ### Boundary conditions:
+        ### type 1 is a specified value, type 2 is a specified gradient
+        ### (units for gradient are degrees/meter)
         bc_u_0  = phi_s # need to pay attention to surface boundary for gas
-        bc_type = 1
-        bc_u    = np.concatenate(([ bc_u_0], [bc_type]))
+        bc_type_u = 1
+        bc_u    = np.concatenate(([ bc_u_0], [bc_type_u]))
 
         bc_d_0  = 0
-        bc_type = 2
-        bc_d    = np.concatenate(([ bc_d_0 ], [ bc_type ]))
+        bc_type_d = 2
+        bc_d    = np.concatenate(([ bc_d_0 ], [ bc_type_d ]))
+        #########################################
 
         b       = b_0 + a_P_0 * phi_t #Patankar 4.41d
 
@@ -282,12 +287,15 @@ def transient_solve_EN(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s,
         a_P_0 = c_vol * dZ #/ dt # (new) Patankar eq. 4.41c, this is b_p in Voller (1990; Eq. 30)           
         a_P     = a_U + a_D + a_P_0 - S_P*dZ*dt # check the multiply on the S_P
 
+        ### Boundary conditions:
+        ### type 1 is a specified value, type 2 is a specified gradient
+        ### (units for gradient are degrees/meter)
         bc_u_0  = phi_s # need to pay attention for gas
-        bc_type = 1
-        bc_u    = np.concatenate(([ bc_u_0], [bc_type]))
+        bc_type_u = 1
+        bc_u    = np.concatenate(([ bc_u_0], [bc_type_u]))
         bc_d_0  = 0
-        bc_type = 2
-        bc_d    = np.concatenate(([ bc_d_0 ], [ bc_type ]))
+        bc_type_d = 2
+        bc_d    = np.concatenate(([ bc_d_0 ], [ bc_type_d ]))
 
         b       = b_0 + a_P_0 * phi_t
 
