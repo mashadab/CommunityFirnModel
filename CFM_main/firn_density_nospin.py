@@ -873,7 +873,7 @@ class FirnDensityNoSpin:
                         self.rho, self.age, self.dz, self.Tz, self.r2, self.z, self.mass, self.dzn, self.LWC, meltgridtrack, self.refreeze, self.runoff = bucket(self,iii)
                         if self.doublegrid==True: # if we use doublegrid -> use the gridtrack corrected for melting
                             self.gridtrack = np.copy(meltgridtrack)
-                        self.meltvol = self.snowmelt[iii]*0.917 #[m w.e.]
+                        self.meltvol = self.snowmeltSec[iii]*S_PER_YEAR*0.917 #[m w.e.]
                     else: # Dry firn column and no input of meltwater                        
                         self.dzn     = self.dz[0:self.compboxes] # Not sure this is necessary
                         self.refreeze, self.runoff, self.meltvol = 0.,0.,0.
@@ -895,7 +895,7 @@ class FirnDensityNoSpin:
                             self.rho, self.age, self.dz, self.Tz, self.r2, self.z, self.mass, self.dzn, self.LWC, meltgridtrack, self.refreeze, self.runoff = darcyscheme(self,iii)
                         if self.doublegrid==True: # if we use doublegrid -> use the gridtrack corrected for melting
                             self.gridtrack = np.copy(meltgridtrack)
-                        self.meltvol = self.snowmelt[iii]*0.917 #[m w.e.]
+                        self.meltvol = self.snowmeltSec[iii]*S_PER_YEAR*0.917 #[m w.e.]
                     else: # Dry firn column and no input of meltwater                       
                         self.refreeze, self.runoff,self.meltvol = 0.,0.,0.
                         self.dzn     = self.dz[0:self.compboxes] # Not sure this is necessary
