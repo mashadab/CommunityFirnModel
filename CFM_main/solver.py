@@ -203,7 +203,7 @@ def transient_solve_TR(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s,
 ###################################
 
 
-def transient_solve_EN(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s, mix_rho, c_vol, LWC, mass_sol, dz):
+def transient_solve_EN(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s, mix_rho, c_vol, LWC, mass_sol, dz,iii=0):
     '''
     transient 1-d diffusion finite volume method for enthalpy
 
@@ -242,7 +242,9 @@ def transient_solve_EN(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s,
     itercheck = 0.9
     count = 0
 
-    while itercheck>0.001:
+    ICT = 0.0 # itercheck threshold 
+
+    while itercheck>ICT:
         g_liq_iter = g_liq.copy()
         deltaH_l = rho_liq_eff * LF_I
         deltaH = deltaH_l # deltaH is zero anywhere that has LWC = 0
@@ -266,14 +268,14 @@ def transient_solve_EN(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s,
 
         ### Voller 1990 # Should be same result as 31, 32 from Voller 1991.
         # beta_P = np.zeros_like(Gamma_P)
-        # beta_P[(g_liq>=0) & (g_liq<=1)]= -1.0e12
+        # beta_P[(g_liq>=0) & (g_liq<=1)]= -1.0e16
         # S_P = beta_P * deltaH * g_liq_old #* dZ * dt
         # S_C = -S_P*phi_t + deltaH*g_liq_old - deltaH*g_liq #+ deltaH*beta_P*
         ### end 1990 
 
         #### eqs. 31, 32 from Voller 1991
         dFdT = np.zeros_like(Gamma_P)
-        dFdT[(g_liq>=0) & (g_liq<=1)]= 1.0e12
+        dFdT[(g_liq>=0) & (g_liq<=1)]= 1.0e15
         Finv = np.zeros_like(dFdT)
         S_P = (-1 * deltaH * dFdT)
         S_C = (deltaH * (g_liq_old - g_liq_iter) + deltaH*dFdT*Finv)
@@ -281,6 +283,7 @@ def transient_solve_EN(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s,
 
         D_u = (Gamma_u / deltaZ_u)
         D_d = (Gamma_d / deltaZ_d)
+
         b_0 = S_C * dZ * dt
         a_U = D_u * dt
         a_D = D_d * dt
@@ -315,7 +318,20 @@ def transient_solve_EN(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s,
         phi_t = solver(a_U, a_D, a_P, b)
         #####
 
-        g_liq[g_liq>0] = g_liq[g_liq>0] + a_P[g_liq>0] * ((phi_t[g_liq>0]) / (dZ[g_liq>0] * deltaH[g_liq>0])) # dz or dZ?
+        ### Use underrelaxation
+        # g_delta = np.zeros_like(g_liq_old)
+        # g_delta[g_liq>0] = (a_P[g_liq>0] * ((phi_t[g_liq>0]) / (dZ[g_liq>0] * deltaH[g_liq>0]))) # dz or dZ?
+        # print('g_delta',max(g_delta),min(g_delta))
+        # UF = 0.9 # underrelaxation parameter
+        # g_liq[g_liq>0] = g_liq[g_liq>0] + UF * g_delta[g_liq>0]
+
+        ### Do not use underrelaxation (Voller says should not need to)
+        # g_liq[g_liq>0] = g_liq[g_liq>0] + (a_P[g_liq>0] * ((phi_t[g_liq>0]) / (dZ[g_liq>0] * deltaH[g_liq>0]))) # dz or dZ?
+        
+
+        ### Voller 1991 eq. 29
+        g_liq[g_liq>0] = g_liq[g_liq>0] + (dFdT[g_liq>0] * (phi_t[g_liq>0]-Finv[g_liq>0]))
+
         g_liq[g_liq<=0] = 0
         g_liq[g_liq>1] = 1
         
@@ -332,12 +348,21 @@ def transient_solve_EN(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s,
         iterdiff = (np.sum(g_liq_iter) - np.sum(g_liq))
         if iterdiff==0:
             itercheck = 0
-            break
+            # break
         else:
             itercheck = np.abs( iterdiff/np.sum(g_liq_iter))
         count += 1
-
-    return phi_t, g_liq
+        if count>100:
+            ICT = 1.0e-7
+        if count>200:
+            ICT = 1.0e-6
+        #     print('count',count)
+        #     print('itercheck',itercheck)
+    # if count>200:
+        # print('iii',iii)
+        # print('count',count)
+        # input('waiting')
+    return phi_t, g_liq, count, iterdiff
 
 ###################################
 ### end transient_solve_EN ########

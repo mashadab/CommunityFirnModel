@@ -92,7 +92,9 @@ def makeSpinFiles(CLIM_name,timeres='1D',Tinterp='mean',spin_date_st = 1980.0, s
     -------
     CD: dictionary
         Dictionary full of the inputs (time, SMB, temperature, etc.) that
-        will force the CFM.
+        will force the CFM. Possible keys to have in the dictionary are: 'time',
+        which is decimal date; 'TSKIN' (surface temperature), 'BDOT'
+        (accumulation, m i.e.), 'SMELT' (snowmelt, m i.e.), and 'RAIN'. 
     StpsPerYr: float
         number of steps per year (mean) for the timeres you selected.
     depth_S1: float
@@ -158,6 +160,8 @@ def makeSpinFiles(CLIM_name,timeres='1D',Tinterp='mean',spin_date_st = 1980.0, s
 
     BDOT_mean_IE = (df_CLIM_re['BDOT']*stepsperyear/917).mean()
     T_mean = (df_TS_re['TSKIN']).mean()
+    print(BDOT_mean_IE)
+    print(T_mean)
 
     hh  = np.arange(0,501)
     age, rho = hla.hl_analytic(350,hh,T_mean,BDOT_mean_IE)    
