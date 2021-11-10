@@ -81,8 +81,6 @@ class ModelOutputs:
                     self.Mout_dict[varname]       = np.zeros((TWlen+1,Glen+1),dtype=self.c['output_bits'])
                     self.Mout_dict[varname][0,:]  = np.append(init_time, MOd[varname])
 
-
-
     def updateMO(self, MOd, mtime, Wtracker):
         '''
         Function to update the output matrices in Mout_dict
@@ -96,7 +94,7 @@ class ModelOutputs:
 
             if self.MOgrid:
                 if varname == 'LWC':
-                    self.Mout_dict[varname][0,:] = np.append(mtime,self.RGfun(MOd['z'], MOd[varname], self.grid_out))
+                    self.Mout_dict[varname][Wtracker,:] = np.append(mtime,self.RGfun(MOd['z'], MOd[varname], self.grid_out))
                 elif ((varname == 'BCO') or (varname == 'DIP') or (varname == 'climate') or (varname == 'runoff') or (varname == 'refreeze') or (varname == 'meltvol')):
                     self.Mout_dict[varname][Wtracker,:] = np.append(mtime,MOd[varname])
                 elif varname == 'z':
@@ -118,7 +116,6 @@ class ModelOutputs:
         varC = np.cumsum(var)
         newVar = np.interp(grid, z, var)
         return np.diff(newVar,append = newVar[-1])
-
 
 
 

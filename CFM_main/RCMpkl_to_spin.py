@@ -46,6 +46,15 @@ def toYearFraction(date):
 
     return date.year + fraction
 
+def decyeartodatetime(din):
+    start = din
+    year = int(start)
+    rem = start - year
+    base = datetime(year, 1, 1)
+    result = base + timedelta(seconds=(base.replace(year=base.year + 1) - base).total_seconds() * rem)
+    result2 = result.replace(hour=0, minute=0, second=0, microsecond=0)
+    return result
+
 def effectiveT(T):
     '''
     The Arrhenius mean temperature.
@@ -178,6 +187,10 @@ def makeSpinFiles(CLIM_name,timeres='1D',Tinterp='mean',spin_date_st = 1980.0, s
     num_reps = int(np.round(desired_depth/BDOT_mean_IE/RCI_length))
     years = num_reps*RCI_length
     sub = np.arange(-1*years,0,RCI_length)
+    startyear = int(df_CLIM_re.index[0].year + sub[0])
+    startmonth = df_CLIM_re.index[0].month
+    startday  = df_CLIM_re.index[0].day
+    startstring = '{}/{}/{}'.format(startday,startmonth,startyear)
 
     msk = df_CLIM_re.decdate.values<spin_date_end+1
     spin_days = df_CLIM_re.decdate.values[msk]
@@ -194,6 +207,7 @@ def makeSpinFiles(CLIM_name,timeres='1D',Tinterp='mean',spin_date_st = 1980.0, s
     spin_dict = {}
     for ID in df_CLIM_ids:
         spin_dict[ID] = np.tile(df_CLIM_re[ID][msk].values, len(sub))
+    # print(spin_days_all[0])
 
     df_CLIM_decdate = df_CLIM_re.set_index('decdate')
     df_spin = pd.DataFrame(spin_dict,index = spin_days_all)

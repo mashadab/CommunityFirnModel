@@ -242,7 +242,7 @@ def transient_solve_EN(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s,
     itercheck = 0.9
     count = 0
 
-    ICT = 0.0 # itercheck threshold 
+    ICT = 0 # itercheck threshold 
 
     while itercheck>ICT:
         g_liq_iter = g_liq.copy()
@@ -352,16 +352,14 @@ def transient_solve_EN(z_edges, Z_P, nt, dt, Gamma_P, phi_0, nz_P, nz_fv, phi_s,
         else:
             itercheck = np.abs( iterdiff/np.sum(g_liq_iter))
         count += 1
-        if count>100:
-            ICT = 1.0e-7
-        if count>200:
-            ICT = 1.0e-6
-        #     print('count',count)
-        #     print('itercheck',itercheck)
-    # if count>200:
-        # print('iii',iii)
-        # print('count',count)
-        # input('waiting')
+        if count==100:
+            if ICT == 0:
+                ICT = 1e-8
+            else:
+                ICT = ICT * 10
+        if count==200:
+            ICT = ICT * 10
+
     return phi_t, g_liq, count, iterdiff
 
 ###################################
@@ -440,13 +438,6 @@ def w(airdict, z_edges, rho_edges, Z_P, dZ):
         # w_ad[co_ind:+1] = 0
 
         # veldiff = velocity
-        # print('dt',airdict['dt'])
-        # print('flux',flux)
-        # print('vel',velocity[co_ind-5:co_ind+5])
-        # print('w_firn',w_firn_edges[co_ind-5:co_ind+5])
-        # print('w_ad',w_ad[co_ind-5:co_ind+5])
-        # print('w_ad',w_ad)
-        # input() 
 
     elif airdict['advection_type']=='zero':
         w_ad = np.zeros_like(rho_edges)
