@@ -314,6 +314,7 @@ class FirnDensityNoSpin:
 
         elif self.c['timesetup']=='retmip': #VV retmip experiments require to match perfectly their 3h time step
             # might be able to just use 'exact'?
+            # (test)
             self.years      = (yr_end - yr_start) #VV
             self.dt         = 10800. #VV 3 hours
             self.stp        = len(input_temp)
