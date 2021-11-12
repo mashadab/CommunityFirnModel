@@ -71,7 +71,7 @@ def bucket(self,iii):
     
     ### Define last variables needed for the routine ###
     nnd        = len(self.z)   # number of nodes
-    # rhoi       = 917.001       # avoids numerical errors due to porosity being strictly 0
+    # rhoi       = 917.00001       # avoids numerical errors due to porosity being strictly 0
     rhoi = RHO_I
     runofftot  = 0.            # initialise runoff [m we]
     LWCblocked = np.zeros(nnd) # initialise LWC blocked by impermeable barriers, susceptible to ponding [m]
@@ -143,9 +143,11 @@ def bucket(self,iii):
     if ColeouLesaffre:
         wmi                     = 0.057 * (rhoi - self.rho) / self.rho + 0.017 # irred. water mass per mass of (water+firn) [/] (Coleou and Lesaffre (1998); Eq.3,Langen (2017))
         wmi[self.rho>=RhoImp]   = 0. # set 0 irreducible water in nodes exceeding impermeability threshold
-        swi                     = wmi/(1-wmi) * rhoi * self.rho / (RHO_W_KGM * (rhoi - self.rho)) # irreducible LWC per porosity space [/] (Eq.4 in Langen (2017))
+        swi                     = np.zeros_like(wmi)
+        imsk                    = self.rho<rhoi
+        swi[imsk]               = wmi[imsk]/(1-wmi[imsk]) * rhoi * self.rho[imsk] / (RHO_W_KGM * (rhoi - self.rho[imsk])) # irreducible LWC per porosity space [/] (Eq.4 in Langen (2017))
         LWCirr                  = phivol_av * swi # maximum LWC that can be held as irreducible water [m]
-    
+   
     LWC_excess   = np.maximum(self.LWC-LWCirr,0) # LWC in excess of irreducible water content (vector)
     
     ### Calculation of storage capacity in each node ###
@@ -164,6 +166,7 @@ def bucket(self,iii):
     refr_cap_supp   = np.minimum(refr_cap0_supp, refr_vol_supp)       # refreezing capacity for additional LWC [m we]
     
     rho_pot         = (self.mass + refr_cap * RHO_W_KGM) / self.dz    # potential density after refreezing the maximum possible [kg m-3]
+    # rho_pot[rho_pot>=rhoi] = rhoi #avoid rounding errors
     phi_pot         = np.zeros_like(rho_pot)
     con1            = rho_pot<rhoi
     phi_pot[con1]   = (rhoi - rho_pot[con1]) / rhoi                   # potential porosity after refreezing [/]
@@ -181,7 +184,9 @@ def bucket(self,iii):
     if ColeouLesaffre:
         wmi_pot                      = 0.057 * (rhoi - rho_pot) / rho_pot + 0.017 # irred. water mass per mass of (water+firn) [/] (Coleou and Lesaffre (1998); Eq.3,Langen (2017))
         wmi_pot[rho_pot >= RhoImp]   = 0. # set 0 irreducible water in nodes exceeding impermeability threshold
-        swi_pot                      = wmi_pot / (1 - wmi_pot) * rhoi * rho_pot / (RHO_W_KGM * (rhoi - rho_pot)) # irreducible LWC per porosity space [/] (Eq.4 in Langen (2017))
+        swi_pot                      = np.zeros_like(wmi_pot)
+        imskp                        = rho_pot < rhoi
+        swi_pot[imskp]               = wmi_pot[imskp] / (1 - wmi_pot[imskp]) * rhoi * rho_pot[imskp] / (RHO_W_KGM * (rhoi - rho_pot[imskp])) # irreducible LWC per porosity space [/] (Eq.4 in Langen (2017))
         LWCirr_pot                   = phivol_av_pot * swi_pot # maximum LWC that can be held as irreducible water [m]
     
     LWCirr_pot[rho_pot >= RhoImp] = 0. # set 0 irreducible water in nodes exceeding impermeability threshold
@@ -371,7 +376,9 @@ def bucket(self,iii):
         if ColeouLesaffre:
             wmi                   = 0.057 * (rhoi - self.rho) / self.rho + 0.017 # irred. wtr mass per mass of (water+firn) [/] (Coleou and Lesaffre (1998); Eq.3 in Langen (2017))
             wmi[self.rho>=RhoImp] = 0. # set 0 irreducible water in nodes exceeding impermeability threshold
-            swi                   = wmi / (1 - wmi) * rhoi * self.rho / (RHO_W_KGM * (rhoi - self.rho)) # irreducible LWC per porosity space [/] (Eq.4, Langen(2017))
+            swi                   = np.zeros_like(wmi)
+            imsk                  = self.rho<rhoi
+            swi[imsk]                  = wmi[imsk] / (1 - wmi[imsk]) * rhoi * self.rho[imsk] / (RHO_W_KGM * (rhoi - self.rho[imsk])) # irreducible LWC per porosity space [/] (Eq.4, Langen(2017))
             LWCirr                = phivol_av * swi # maximum LWC that can be held as irreducible water [m]
         
         LWCirr[self.rho >= RhoImp] = 0.             # set 0 irreducible water in nodes exceeding impermeability threshold

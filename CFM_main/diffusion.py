@@ -136,10 +136,12 @@ def heatDiff(self,iii):
             pass
 
         elif np.any(self.Tz>273.15):
-            print('WARNING: TEMPERATURE EXCEEDS MELTING TEMPERATURE')
+            print('WARNING: TEMPERATURE EXCEEDS MELTING TEMPERATURE (heat)')
+            print('LWC',np.max(self.LWC),np.min(self.LWC))
             print('Maximum temperature was:',np.max(self.Tz),' at layers:',np.where(self.Tz == np.max(self.Tz)))
             print('WARM TEMPERATURES HAVE BEEN SET TO 273.15; MODEL RUN IS CONTINUING')
-            self.Tz[self.Tz>=273.15]=273.15
+            input()
+        self.Tz[self.Tz>=273.15]=273.15
 
     return self.Tz, self.T10m
 
@@ -198,11 +200,11 @@ def enthalpyDiff(self,iii):
     self.T10m       = self.Tz[np.where(self.z>=10.0)[0][0]]
 
     if np.any(self.Tz>273.15):
-        print('WARNING: TEMPERATURE EXCEEDS MELTING TEMPERATURE')
+        print('WARNING: TEMPERATURE EXCEEDS MELTING TEMPERATURE (enthalpy)')
         print('Maximal temperature was:',np.max(self.Tz),' at layers:',np.where(self.Tz == np.max(self.Tz)))
         print('iii, modeltime', iii, self.modeltime[iii])
         print('WARM TEMPERATURES HAVE BEEN SET TO 273.15; MODEL RUN IS CONTINUING')
-        self.Tz[self.Tz>=273.15]=273.15
+    self.Tz[self.Tz>=273.15]=273.15
     
     self.LWC = g_liq * self.dz
     # self.LWC        = g_liq * vol_tot
