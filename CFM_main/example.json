@@ -86,5 +86,20 @@
 "spinUpdate": true,
 "spinUpdateDate": 1980.0,
 "DIPhorizon": 100.0,
-"NewSpin": false
+"NewSpin": false,
+"ColeouLesaffre": true,
+"IrrVal": 0.02,
+"RhoImp": 830,
+"DownToIce": false,
+"ThickImp": 0.1,
+"Ponding": false,
+"DirectRunoff": 0.0,
+"RunoffZuoOerlemans": false,
+"Slope": 0.1
 }
+
+
+
+
+
+

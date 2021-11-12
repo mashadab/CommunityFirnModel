@@ -33,17 +33,32 @@ def bucket(self,iii):
 
     ####################
     ### USER CHOICES ###
-    ColeouLesaffre     = True  # parameterising irreducible water content following Coléou and Lesaffre (1998) formulation [True/False]
-    if ColeouLesaffre == False:
-        IrrVal         = 0.02   # [%] irreducible water content: proportion of pore space that holds irreducible water
-    RhoImp             = 830.   # density threshold for nodes to be considered as ice lens [kg m-3]
-    DownToIce          = True  # allows water to bypass all ice lenses until ice sheet is reached (depth where RhoImp density is definitely reached)
-    if DownToIce == False:
-        ThickImp       = 0.1    # thickness threshold for ice lens to be impermeable (all ice layers are impermeable if set to 0m) [m] # Using this is slow
-    Ponding            = True  # allowing LWC ponding above impermeable ice lenses [True/False]
-    DirectRunoff       = 0.0    # (applicable if Ponding==True) fraction of excess LWC not considered for ponding but running off directly [between 0 and 1]
-    RunoffZuoOerlemans = True  # (applicable if Ponding==True) computing lateral runoff following Zuo and Oerlemans (1996) Eqs.(21,22) [True/False]
-    Slope              = 0.1     # (used only if RunoffZuoOerlemans==True) slope value used in Zuo and Oerlemans (1996) Eq.(22) [/]
+    try:
+        ColeouLesaffre     = self.c['ColeouLesaffre']  # parameterising irreducible water content following Coléou and Lesaffre (1998) formulation [True/False]
+        if ColeouLesaffre == False:
+            IrrVal         = self.c['IrrVal']   # [%] irreducible water content: proportion of pore space that holds irreducible water
+        RhoImp             = self.c['RhoImp']   # density threshold for nodes to be considered as ice lens [kg m-3]
+        DownToIce          = self.c['DownToIce']  # allows water to bypass all ice lenses until ice sheet is reached (depth where RhoImp density is definitely reached)
+        if DownToIce == False:
+            ThickImp       = self.c['ThickImp']    # thickness threshold for ice lens to be impermeable (all ice layers are impermeable if set to 0m) [m] # Using this is slow
+        Ponding            = self.c['Ponding']  # allowing LWC ponding above impermeable ice lenses [True/False]
+        DirectRunoff       = self.c['DirectRunoff']    # (applicable if Ponding==True) fraction of excess LWC not considered for ponding but running off directly [between 0 and 1]
+        RunoffZuoOerlemans = self.c['RunoffZuoOerlemans']  # (applicable if Ponding==True) computing lateral runoff following Zuo and Oerlemans (1996) Eqs.(21,22) [True/False]
+        Slope              = self.c['Slope']     # (used only if RunoffZuoOerlemans==True) slope value used in Zuo and Oerlemans (1996) Eq.(22) [/]
+
+    except:
+        print('You should add the new melt variables to your .json See melt.py and example.json')
+        ColeouLesaffre     = True  # parameterising irreducible water content following Coléou and Lesaffre (1998) formulation [True/False]
+        if ColeouLesaffre == False:
+            IrrVal         = 0.02   # [%] irreducible water content: proportion of pore space that holds irreducible water
+        RhoImp             = 830.   # density threshold for nodes to be considered as ice lens [kg m-3]
+        DownToIce          = False  # allows water to bypass all ice lenses until ice sheet is reached (depth where RhoImp density is definitely reached)
+        if DownToIce == False:
+            ThickImp       = 0.1    # thickness threshold for ice lens to be impermeable (all ice layers are impermeable if set to 0m) [m] # Using this is slow
+        Ponding            = False  # allowing LWC ponding above impermeable ice lenses [True/False]
+        DirectRunoff       = 0.0    # (applicable if Ponding==True) fraction of excess LWC not considered for ponding but running off directly [between 0 and 1]
+        RunoffZuoOerlemans = False  # (applicable if Ponding==True) computing lateral runoff following Zuo and Oerlemans (1996) Eqs.(21,22) [True/False]
+        Slope              = 0.1     # (used only if RunoffZuoOerlemans==True) slope value used in Zuo and Oerlemans (1996) Eq.(22) [/]
     ### END USER CHOICES ###
     ########################
 
